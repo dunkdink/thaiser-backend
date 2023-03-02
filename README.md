@@ -1,2 +1,0 @@
-# thaiser-backend
- 

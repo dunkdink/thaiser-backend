@@ -1,27 +1,29 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 
 Base = declarative_base()
 
-
-class Book(Base):
-    __tablename__ = "book"
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    rating = Column(Integer)
-    time_created = Column(DateTime(timezone=True), server_default=func.now())
-    time_updated = Column(DateTime(timezone=True), onupdate=func.now())
-    author_id = Column(Integer, ForeignKey("author.id"))
-
-    author = relationship("Author")
-
-
-class Author(Base):
-    __tablename__ = "author"
+    
+class User(Base):
+    __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
+    username = Column(String(50), unique=True, nullable=False)
+    email = Column(String(120), unique=True, nullable=False)
+    password = Column(String(128), nullable=False)
     name = Column(String)
     age = Column(Integer)
-    time_created = Column(DateTime(timezone=True), server_default=func.now())
-    time_updated = Column(DateTime(timezone=True), onupdate=func.now())
+    gender = Column(String)
+    
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
+class Record(Base):
+    __tablename__ = 'records'
+    id = Column(Integer, primary_key=True)
+    recorder_id = Column(String)
+    record_file = Column(String)
+    emotion_label_by_human = Column(String)
+    emotion_label_by_machine = Column(String)
+    
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

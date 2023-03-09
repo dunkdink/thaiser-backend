@@ -1,18 +1,21 @@
 from pydantic import BaseModel
 
-
-class Book(BaseModel):
-    title: str
-    rating: int
-    author_id: int
-
+class User(BaseModel):
+    username: str
+    email: str
+    password: str
+    name: str
+    age: int
+    gender: int
+    
     class Config:
         orm_mode = True
 
-
-class Author(BaseModel):
-    name: str
-    age: int
-
+class Record(BaseModel):
+    recorder_id: str
+    record_file: str
+    emotion_label_by_human: str
+    emotion_label_by_machine: str
+    
     class Config:
         orm_mode = True

@@ -9,6 +9,7 @@ from JWTMiddleware import jwt_middleware
 from fastapi.middleware.cors import CORSMiddleware
 from api.user import signInsignUp
 from api.user import editProfile
+from api.user import upload
 
 
 load_dotenv(".env")
@@ -18,6 +19,7 @@ app = FastAPI()
 app.add_middleware(DBSessionMiddleware, db_url=os.environ["DATABASE_URL"])
 app.include_router(signInsignUp.router)
 app.include_router(editProfile.router)
+app.include_router(upload.router)
 
 @app.get("/")
 async def root():

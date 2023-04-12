@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.user import signInsignUp
 from api.user import editProfile
 from api.user import upload
-
+from api.user import history
 
 load_dotenv(".env")
 
@@ -20,6 +20,7 @@ app.add_middleware(DBSessionMiddleware, db_url=os.environ["DATABASE_URL"])
 app.include_router(signInsignUp.router)
 app.include_router(editProfile.router)
 app.include_router(upload.router)
+app.include_router(history.router)
 
 @app.get("/")
 async def root():

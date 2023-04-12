@@ -5,8 +5,6 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordRequestForm
 from models import User
-from models import Record
-
 router = APIRouter()
 
 __pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -23,9 +21,6 @@ def __authenticate_user(username: str, password: str) -> User:
     if not user:
         raise HTTPException(
             status_code=401, detail="Incorrect username or password")
-
-    user = User(id=user.id, username=user.username, email=user.email,
-                password=user.password, name=user.name, age=user.age, gender=user.gender)
 
     if not __pwd_context.verify(password, user.password):
         raise HTTPException(
@@ -79,23 +74,30 @@ def __is_valid_password(password: str) -> bool:
 
 @router.post("/validateToken")
 def validateToken(token: str):
-    payload = jwt.decode(token, "dunkdink", algorithms=["HS256"])
-    if not payload['sub']:
+    try:
+        payload = jwt.decode(token, __SECRET_KEY, algorithms=[__ALGORITHM])
+        if not payload['sub']:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return payload
+    except jwt.DecodeError:
         raise HTTPException(status_code=401, detail="Invalid token")
-    return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
 
 
 @router.post("/signup")
 def create_user(username: str, email: str, password: str, name: str, age: int, gender: str):
+    # Check if username already exists
+    if db.session.query(User).filter(User.username == username).first():
+        raise HTTPException(status_code=400, detail="Username already exists")
 
-    # if __authClient.find_one({"username": username}):
-    #     raise HTTPException(status_code=400, detail="Username already exists")
+    # Check if email is valid
+    if not "@" in email:
+        raise HTTPException(status_code=400, detail="Invalid email address")
 
-    # if __authClient.find_one({"client_id": client_id}):
-    #     raise HTTPException(status_code=400, detail="Client already have a Authorization account")
-
-    # if not __is_valid_password(password):
-    #     raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter, one lowercase letter, one digit")
+    # Check if password is valid
+    if not __is_valid_password(password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter, one lowercase letter, one digit, and be at least 8 characters long")
 
     hashed_password = __pwd_context.hash(password)
     user = User(username=username, email=email,
@@ -103,3 +105,4 @@ def create_user(username: str, email: str, password: str, name: str, age: int, g
     db.session.add(user)
     db.session.commit()
     return user
+

@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class User(BaseModel):
     username: str
     email: str
@@ -7,19 +8,16 @@ class User(BaseModel):
     name: str
     age: int
     gender: int
-    
+
     class Config:
         orm_mode = True
 
 
-
-
-
 class Record(BaseModel):
-    recorder_id: str
-    record_file: str
-    emotion_label_by_human: str
-    emotion_label_by_machine: str
-    
+    relative_path: str
+    output: str
+    emotion: str
+    user_id: str
+
     class Config:
         orm_mode = True

@@ -97,12 +97,11 @@ def create_user(username: str, email: str, password: str, name: str, age: int, g
 
     # Check if password is valid
     if not __is_valid_password(password):
-        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter, one lowercase letter, one digit, and be at least 8 characters long")
+        raise HTTPException(
+            status_code=400, detail="Password must contain at least one uppercase letter, one lowercase letter, one digit, and be at least 8 characters long")
 
     hashed_password = __pwd_context.hash(password)
-    user = User(username=username, email=email,
-                password=hashed_password, name=name, age=age, gender=gender)
+    user = User(username=username, email=email,password=hashed_password, name=name, age=age, gender=gender)
     db.session.add(user)
     db.session.commit()
     return user
-

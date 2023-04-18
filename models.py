@@ -19,11 +19,13 @@ class User(Base):
     
 class Record(Base):
     __tablename__ = 'records'
-    id = Column(Integer, primary_key=True)
-    recorder_id = Column(String)
-    record_file = Column(String)
-    emotion_label_by_human = Column(String)
-    emotion_label_by_machine = Column(String)
+    id = Column(Integer,primary_key=True)
+    relative_path = Column(String)
+    output = Column(Integer)
+    emotion = Column(String)
+    user_id = Column(Integer)
     
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
+

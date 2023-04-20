@@ -26,7 +26,7 @@ async def upload_to_s3(file: UploadFile = File(...)):
     client.upload_fileobj(BytesIO(file_content), bucket, upload_file_key)
 
     print('Upload to S3 successfully')
-
+    return {'file_name': upload_file_key}
 
 @router.post("/upload_result_to_postgres")
 def upload_to_pq():

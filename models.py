@@ -19,7 +19,7 @@ class User(Base):
     
 class Record(Base):
     __tablename__ = 'records'
-    id = Column(Integer,primary_key=True)
+    index = Column(Integer,primary_key=True)
     relative_path = Column(String)
     output = Column(Integer)
     emotion = Column(String)

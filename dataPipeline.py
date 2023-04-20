@@ -467,6 +467,15 @@ def load_df_to_postgres(df, table_name, db_url):
     # Create a SQLAlchemy engine object for the database
     engine = create_engine(db_url)
 
+    # Retrieve the maximum index value from the target table in the database
+    max_index = pd.read_sql_query(
+        f"SELECT MAX(index) FROM {table_name}", con=engine).iloc[0, 0]
+    if max_index is None:
+        max_index = 0
+
+    # Modify the df['index'] column to start from the next value after the maximum index in the database
+    df['index'] = pd.Series(range(max_index+1, max_index+1+df.shape[0]))
+
     # Load the DataFrame data to the database table in batches
     batch_size = 1000
     num_batches = int(df.shape[0] / batch_size) + 1
@@ -474,14 +483,43 @@ def load_df_to_postgres(df, table_name, db_url):
         start = i * batch_size
         end = (i + 1) * batch_size
         df_batch = df.iloc[start:end]
-        # df_batch.to_sql(table_name, engine, if_exists='append', index=False)
-        df_batch.to_sql(table_name, engine, if_exists='append')
-        
+        df_batch.to_sql(table_name, engine, if_exists='append', index=False)
 
     print(f"Loaded {df.shape[0]} rows to {table_name} table in the database.")
 
+# def load_df_to_postgres(df, table_name, db_url):
+#     """
+#     Load a Pandas DataFrame to a PostgreSQL database table using SQLAlchemy.
 
-def classify(user_id=-1):
+#     Parameters:
+#     df (pandas.DataFrame): The DataFrame to load to the database.
+#     table_name (str): The name of the table to create in the database.
+#     db_url (str): The SQLAlchemy connection string for the database.
+#                   Example: 'postgresql://user:password@localhost:5432/mydatabase'
+
+#     Returns:
+#     None
+#     """
+#     # Create a SQLAlchemy engine object for the database
+#     engine = create_engine(db_url)
+
+#     print(df.head())
+
+#     # Load the DataFrame data to the database table in batches
+#     batch_size = 1000
+#     num_batches = int(df.shape[0] / batch_size) + 1
+#     for i in range(num_batches):
+#         start = i * batch_size
+#         end = (i + 1) * batch_size
+#         df_batch = df.iloc[start:end]
+#         # df_batch.to_sql(table_name, engine, if_exists='append', index=False)
+#         df['index'] = df['index'].apply(lambda x: f"{x}_new" if x in set(df['index']) & set(pd.read_sql_query(f"SELECT id FROM {table_name}", con=engine)['index']) else x)
+#         df_batch.to_sql(table_name, engine, if_exists='append', index=False)
+
+#     print(f"Loaded {df.shape[0]} rows to {table_name} table in the database.")
+
+
+def classify(user_id=1):
     input_audio_list = s3_listdir(data_path_dir)
     df = pd.DataFrame({'relative_path': input_audio_list})
     print(df.head())
@@ -520,21 +558,21 @@ def classify(user_id=-1):
     res_df = df.copy()
     res_df['output'] = prediction
     res_df['emotion'] = res_df['output'].map(emotion_dict)
-    print('classify uid ', user_id)
     res_df['user_id'] = user_id
     # save res_df
     datetimenow = datetime.datetime.now()
-
 # Create a filename with the current date and time
-    filename = "emotion_res_" + str(datetimenow) + '.csv'
+    filename = "emotionres" + str(datetimenow) + '.csv'
     post_df_to_s3(res_df, filename)
-    emotion_cnt = res_df['emotion'].value_counts()
+    emotion_list = ['Neutral', 'Angry', 'Happy', 'Sad', 'Frustrated']
+    emotion_cnt = res_df['emotion'].value_counts().reindex(
+        emotion_list, fill_value=0)
     res = emotion_cnt.to_json()
 
     destination_folder = hist_data_path_dir
     for f in s3_listdir(data_path_dir):
         # move file to history after classify
-        # Full path to the file to be moved
+      # Full path to the file to be moved
         file_path = data_path_dir + \
             f.replace('input_audio/', '')  # remove redundant
 
@@ -728,8 +766,14 @@ def upload_res():
     dfs = s3_load_csv()
     print('Loading .', end='')
     for df in dfs:
-        print('uid in upload res ', df['user_id'])
         load_df_to_postgres(df, table_name, db_url)
         print('.', end=' ')
     print()
     print(' Loaded to postgress')
+    s3 = client
+    print(s3_listdir(res_dir))
+    for relative_path in s3_listdir(res_dir):
+
+        s3.delete_object(Bucket=bucket, Key=relative_path)
+
+    print('Deleted results csv')

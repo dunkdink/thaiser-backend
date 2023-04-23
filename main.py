@@ -22,11 +22,26 @@ app.include_router(editProfile.router)
 app.include_router(upload.router)
 app.include_router(history.router)
 
+def custom_openapi():
+    """Generate a custom OpenAPI schema"""
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="My API",
+        version="1.0.0",
+        description="This is a custom OpenAPI schema",
+        routes=app.routes,
+    )
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
-
+@app.get("/swagger.json")
+async def get_swagger_json():
+    return custom_openapi()
 
 # Set up allowed origins
 origins = [

@@ -44,18 +44,18 @@ db_url = 'postgresql+psycopg2://postgres:password@db:5432/thaiser_db'
 table_name = 'records'
 
 # s3 config
-bucket = "thaiser-file-storage"
+bucket = "thaiser2-file-storage"
 region = "ap-southeast-2"
-access_key = "AKIA6OROF7LYVCXDAAEO"
-secret_key = "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"
+access_key = "AKIA2FJDZDJHGVUW2J24"
+secret_key = "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"
 client = boto3.client('s3', aws_access_key_id=access_key,
                       aws_secret_access_key=secret_key, region_name=region)
-res_dir = 's3://thaiser-file-storage/res/'  # res/
-data_path_dir = 's3://thaiser-file-storage/input_audio/'  # input_audio/
+res_dir = 's3://thaiser2-file-storage/res/'  # res/
+data_path_dir = 's3://thaiser2-file-storage/input_audio/'  # input_audio/
 # saved_models/
-model_path = 's3://thaiser-file-storage/saved_models/eff_b0_extend10linear.pt'
-hist_data_path_dir = 's3://thaiser-file-storage/history_input/'  # history_input/
-buffer_input_dir = 's3://thaiser-file-storage/buffer_input/'
+model_path = 's3://thaiser2-file-storage/saved_models/restored_model.pt'
+hist_data_path_dir = 's3://thaiser2-file-storage/history_input/'  # history_input/
+buffer_input_dir = 's3://thaiser2-file-storage/buffer_input/'
 
 
 def s3_listdir(s3_uri):
@@ -344,7 +344,7 @@ class AudioUtil():
 
 # class SoundDS(Dataset):
 #   def __init__(self, df, data_path_dir,augment=True):
-#     bucket = "thaiser-file-storage"
+#     bucket = "thaiser2-file-storage"
 #     access_key = "acc_key"
 #     secret_key = "secret_key"
 #     client = boto3.client('s3', aws_access_key_id=access_key,
@@ -391,14 +391,14 @@ class AudioUtil():
 class SoundDS(Dataset):
     def __init__(self, df, data_path_dir, augment=True):
         self.df = df
-        bucket = "thaiser-file-storage"
+        bucket = "thaiser2-file-storage"
         region = "ap-southeast-2"
-        access_key = "AKIA6OROF7LYVCXDAAEO"
-        secret_key = "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"
+        access_key = "AKIA2FJDZDJHGVUW2J24"
+        secret_key = "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"
         client = boto3.client('s3', aws_access_key_id=access_key,
                               aws_secret_access_key=secret_key, region_name=region)
         self.s3_client = client
-        self.bucket_name = "thaiser-file-storage"
+        self.bucket_name = "thaiser2-file-storage"
         self.data_path_dir = data_path_dir
         self.duration = 4000
         self.sr = 44100
@@ -668,7 +668,7 @@ def classify(user_id=1):
 #         for i, segment in enumerate(segments):
 #             segment_length = segment.size(1) / sample_rate
 #             filename = f"{filename_base}_{i*20}_{(i+1)*20-1}_({segment_length:.2f}s).wav"
-#             s3_segment_uri = f"s3://{bucket}/{prefix}/{filename}".replace('s3://thaiser-file-storage/input_audio//','')
+#             s3_segment_uri = f"s3://{bucket}/{prefix}/{filename}".replace('s3://thaiser2-file-storage/input_audio//','')
 
 #             torchaudio.save(s3_segment_uri, segment, sample_rate)
 
@@ -725,7 +725,7 @@ def splitter():
         for i, segment in enumerate(segments):
             segment_length = segment.size(1) / sample_rate
             filename = f"{filename_base}_{i*20}_{(i+1)*20-1}_({segment_length:.2f}s).wav".replace(
-                's3://thaiser-file-storage/buffer_input/', '')
+                's3://thaiser2-file-storage/buffer_input/', '')
             des = f"{'input_audio'}/{filename}"
             print('des : ', des)
             with tempfile.NamedTemporaryFile() as tmp_file:

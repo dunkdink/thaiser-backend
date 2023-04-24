@@ -13,8 +13,8 @@ async def upload_to_s3(file: UploadFile = File(...)):
     print('Uploading to S3...')
     bucket = "thaiser2-file-storage"
     region = "ap-southeast-2"
-    access_key = "access_key"
-    secret_key = "secret_key"
+    access_key = "AKIA2FJDZDJHGVUW2J24"
+    secret_key = "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"
     client = boto3.client('s3', aws_access_key_id=access_key,
                           aws_secret_access_key=secret_key, region_name=region)
 

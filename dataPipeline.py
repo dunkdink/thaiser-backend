@@ -46,8 +46,8 @@ table_name = 'records'
 # s3 config
 bucket = "thaiser2-file-storage"
 region = "ap-southeast-2"
-access_key = "AKIA2FJDZDJHGVUW2J24"
-secret_key = "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"
+access_key = "access_key"
+secret_key = "secret_key"
 client = boto3.client('s3', aws_access_key_id=access_key,
                       aws_secret_access_key=secret_key, region_name=region)
 res_dir = 's3://thaiser2-file-storage/res/'  # res/
@@ -393,8 +393,8 @@ class SoundDS(Dataset):
         self.df = df
         bucket = "thaiser2-file-storage"
         region = "ap-southeast-2"
-        access_key = "AKIA2FJDZDJHGVUW2J24"
-        secret_key = "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"
+        access_key = "access_key"
+        secret_key = "secret_key"
         client = boto3.client('s3', aws_access_key_id=access_key,
                               aws_secret_access_key=secret_key, region_name=region)
         self.s3_client = client

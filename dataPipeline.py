@@ -46,8 +46,8 @@ table_name = 'records'
 # s3 config
 bucket = "thaiser2-file-storage"
 region = "ap-southeast-2"
-access_key = "AKIA2FJDZDJHGVUW2J24"
-secret_key = "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"
+access_key = "AKIA2FJDZDJHNRJRMAEO"
+secret_key = "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"
 client = boto3.client('s3', aws_access_key_id=access_key,
                       aws_secret_access_key=secret_key, region_name=region)
 res_dir = 's3://thaiser2-file-storage/res/'  # res/
@@ -393,8 +393,8 @@ class SoundDS(Dataset):
         self.df = df
         bucket = "thaiser2-file-storage"
         region = "ap-southeast-2"
-        access_key = "AKIA2FJDZDJHGVUW2J24"
-        secret_key = "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"
+        access_key = "AKIA2FJDZDJHNRJRMAEO"
+        secret_key = "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"
         client = boto3.client('s3', aws_access_key_id=access_key,
                               aws_secret_access_key=secret_key, region_name=region)
         self.s3_client = client
@@ -707,16 +707,17 @@ def splitter():
         audio_length = waveform.size(1) / sample_rate
 
         # Split the audio into segments of length <= 20 seconds
-        segment_length = 20 * sample_rate
+        segment_length = 4 * sample_rate
         segments = []
         for i in range(0, waveform.size(1), segment_length):
             segment = waveform[:, i:i+segment_length]
             segments.append(segment)
 
         # If there is any remaining audio, add it as a final segment
-        if waveform.size(1) % segment_length > 1 and waveform.size(1) > segment_length:
+        if waveform.size(1) % segment_length > 1 and waveform.size(1) > segment_length and segment_length > 1 * sample_rate:
             segment = waveform[:, i+segment_length:]
-            segments.append(segment)
+            if segment.size(1) / sample_rate > 1:
+                segments.append(segment)
 
         # Delete the original audio file
         s3.delete_object(Bucket=bucket, Key=relative_path)
@@ -724,7 +725,7 @@ def splitter():
         # Save each segment as a separate audio file with the original filename
         for i, segment in enumerate(segments):
             segment_length = segment.size(1) / sample_rate
-            filename = f"{filename_base}_{i*20}_{(i+1)*20-1}_({segment_length:.2f}s).wav".replace(
+            filename = f"{filename_base}_{i*4}_{(i+1)*4-1}_({segment_length:.2f}s).wav".replace(
                 's3://thaiser2-file-storage/buffer_input/', '')
             des = f"{'input_audio'}/{filename}"
             print('des : ', des)

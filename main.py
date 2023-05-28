@@ -48,7 +48,9 @@ origins = [
     "http://localhost",
     "http://localhost:8000",
     "http://localhost:3000",
-    "https://example.com"
+    "https://example.com",
+    "https://ce32.ce.kmitl.cloud",
+    "https://api.ce32.ce.kmitl.cloud"
 ]
 
 # Add CORS middleware
